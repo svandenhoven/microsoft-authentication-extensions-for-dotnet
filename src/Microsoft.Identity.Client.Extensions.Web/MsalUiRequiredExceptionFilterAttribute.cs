@@ -59,7 +59,13 @@ namespace Microsoft.Identity.Client.Extensions.Web
             // InMemoryCache, the cache could be empty if the server was restarted. This is why
             // the null_user exception is thrown.
 
-            return ex.ErrorCode == MsalError.UserNullError;
+            // ex.ErrorCode != MsalUiRequiredException.InvalidGrantError indicates a incremental consent.
+            // When a scope is requsted that is not availabe in the the tokencache a new accesstoken need to
+            // requested. If the user had not given consent for the permission or no admin consent is given
+            // an invalid grant error occurs. By re authenticating with the new scopes a consent can given by
+            // user.
+
+            return ex.ErrorCode == MsalError.UserNullError || ex.ErrorCode == MsalError.InvalidGrantError;
         }
 
         /// <summary>
